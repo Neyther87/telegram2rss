@@ -10,10 +10,10 @@
   "type": "module",
   "main": "dist/app.js",
   "scripts": {
-    "build": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external",
-    "build:vercel": "echo vercel",
-    "watch": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external --watch",
-    "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/app.js\""
+    "build": "esbuild src/app.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
+    "build:vercel": "esbuild src/vercel.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
+    "watch": "esbuild src/app.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external --watch",
+    "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/index.js\""
   },
   "keywords": [],
   "author": "",

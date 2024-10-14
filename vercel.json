@@ -1,13 +1,16 @@
 {
+  "version": 2,
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/api"
     }
   ],
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "src/**/*"
+  "builds": [
+    {
+      "src": "dist/index.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["dist/**"] }
     }
-  }
+  ]
 }
