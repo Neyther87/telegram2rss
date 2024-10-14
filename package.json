@@ -11,6 +11,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
+    "build:vercel": "esbuild src/index.ts --bundle --platform=node --outfile=dist/api/index.js --format=esm --packages=external",
     "watch": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external --watch",
     "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/index.js\""
   },
