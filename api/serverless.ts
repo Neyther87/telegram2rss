@@ -4,7 +4,7 @@ const app = Fastify({
   logger: true,
 });
 
-app.register(import('../app.js'), {
+app.register(import('../public/app.js'), {
   prefix: '/',
 });
 
