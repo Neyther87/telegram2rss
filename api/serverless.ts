@@ -1,10 +1,11 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
+import registerRoutes from '../src/app';
 
 const app = Fastify({
   logger: true,
 });
 
-app.register(import('../public/app.js'), {
+app.register(registerRoutes, {
   prefix: '/',
 });
 
