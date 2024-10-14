@@ -1,16 +1,15 @@
 {
-  "version": 2,
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/api"
     }
   ],
-  "builds": [
-    {
-      "src": "dist/index.js",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] }
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm vercel-build",
+  "functions": {
+    "api/serverless.ts": {
+      "maxDuration": 30
     }
-  ]
+  }
 }

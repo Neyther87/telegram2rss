@@ -66,7 +66,7 @@ export async function buildFeed(channel: Channel, stream: Readable) {
 }
 
 async function getMediaInfo(media: Media) {
-  const response = await fetch(media.url, { method: 'HEAD' });
+  const response: any = await fetch(media.url, { method: 'HEAD' });
   return {
     size: Number(response.headers.get('Content-Length')),
     type: response.headers.get('Content-Type') || '',

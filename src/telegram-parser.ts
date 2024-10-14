@@ -52,7 +52,7 @@ async function getChannelContent(channel: string, options?: { before?: number; a
   if (options?.after) {
     requestUrl.searchParams.set('after', options.after.toString());
   }
-  const response = await fetch(requestUrl);
+  const response: any = await fetch(requestUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel}`);
   }

@@ -1,5 +1,5 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
-import registerRoutes from './app';
+import registerRoutes from '../src/app';
 
 const app = Fastify({
   logger: true,
