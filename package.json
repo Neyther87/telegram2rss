@@ -8,11 +8,11 @@
     "node": ">=20.0.0"
   },
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/app.js",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
-    "watch": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external --watch",
-    "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/index.js\""
+    "build": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external",
+    "watch": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external --watch",
+    "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/app.js\""
   },
   "keywords": [],
   "author": "",

@@ -1,13 +1,12 @@
-import Fastify from 'fastify';
-import registerRoutes from '../src/index';
+import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 
 const app = Fastify({
   logger: true,
 });
 
-app.register(registerRoutes);
+app.register(import('../app.js'));
 
-export default async (req, res) => {
+export default async (req: FastifyRequest, res: FastifyReply) => {
   await app.ready();
   app.server.emit('request', req, res);
 };
