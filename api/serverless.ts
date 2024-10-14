@@ -1,10 +1,11 @@
 import Fastify from 'fastify';
+import registerRoutes from '../src/index';
 
 const app = Fastify({
   logger: true,
 });
 
-app.register(import('../index.js'));
+app.register(registerRoutes);
 
 export default async (req, res) => {
   await app.ready();

@@ -1,4 +1,4 @@
-import Fastify, { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { getChannelInfoWithPosts } from './telegram-parser';
 import { Readable } from 'stream';
 import { buildFeed } from './telegram-to-feed';
@@ -37,6 +37,7 @@ export default function registerRoutes(app: FastifyInstance) {
 }
 
 if (process.env.NODE_ENV === 'development') {
+  const Fastify = await import('fastify').then(r => r.default);
   const app = Fastify({
     logger: true,
   });
