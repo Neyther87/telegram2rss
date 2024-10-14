@@ -11,7 +11,7 @@
   "main": "dist/app.js",
   "scripts": {
     "build": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external",
-    "build:vercel": "esbuild api/serverless.ts --bundle --platform=node --outfile=api/serverless.js --format=esm --packages=external",
+    "build:vercel": "echo vercel",
     "watch": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.js --format=esm --packages=external --watch",
     "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/app.js\""
   },
