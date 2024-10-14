@@ -1,52 +1,25 @@
-import type { FastifyInstance } from 'fastify';
-import { getChannelInfoWithPosts } from './telegram-parser';
-import { Readable } from 'stream';
-import { buildFeed } from './telegram-to-feed';
+import { Hono } from 'hono';
+import { stream } from 'hono/streaming';
+import { getChannelInfoWithPosts } from './telegram-parser.js';
+import { buildFeed } from './telegram-to-feed.js';
 
-export default function registerRoutes(app: FastifyInstance) {
-  app.get(
-    '/rss/:channel',
-    {
-      schema: {
-        params: {
-          type: 'object',
-          properties: {
-            channel: { type: 'string' },
-          },
-          required: ['channel'],
-        },
-        querystring: {
-          type: 'object',
-          properties: {
-            count: { type: 'number' },
-          },
-        },
-      },
-    },
-    async (request, response) => {
-      const { channel } = request.params as { channel: string };
-      const { count: postsCountRaw } = request.query as { count?: number | string };
-      const postsCount = postsCountRaw ? Math.min(Number(postsCountRaw), 50) : undefined;
-      const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
-      const stream = new Readable();
-      stream._read = () => {};
-      await buildFeed(channelInfo, stream);
-      return response.status(200).type('application/rss+xml').send(stream);
-    },
-  );
-}
+const app = new Hono();
+
+app.get('/rss/:channel', async context => {
+  const channel = context.req.param('channel');
+  const postsCountRaw = context.req.query('count');
+  const postsCount = postsCountRaw ? Math.min(Number(postsCountRaw), 50) : undefined;
+  const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
+  context.header('Content-Type', 'application/rss+xml');
+  context.status(200);
+  return stream(context, async s => {
+    await buildFeed(channelInfo, s);
+  });
+});
 
 if (process.env.NODE_ENV === 'development') {
-  const Fastify = await import('fastify').then(r => r.default);
-  const app = Fastify({
-    logger: true,
-  });
-  registerRoutes(app);
-  app.listen({ port: 8080 }, (err, address) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    console.log(`Server listening at ${address}`);
-  });
+  const serve = await import('@hono/node-server').then(m => m.serve);
+  serve({ port: 8080, fetch: app.fetch });
 }
+
+export default app;

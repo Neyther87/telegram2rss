@@ -2,7 +2,7 @@ import * as htmlparser2 from 'htmlparser2';
 import * as CSSselect from 'css-select';
 import { Document, Element } from 'domhandler';
 import { innerText } from 'domutils';
-import { innerTextEx } from './domutils-extensions';
+import { innerTextEx } from './domutils-extensions.js';
 
 export type Media = {
   type: 'photo' | 'video';

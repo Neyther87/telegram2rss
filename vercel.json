@@ -6,10 +6,5 @@
     }
   ],
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm vercel-build",
-  "functions": {
-    "api/serverless.ts": {
-      "maxDuration": 30
-    }
-  }
+  "buildCommand": "pnpm vercel-build"
 }
