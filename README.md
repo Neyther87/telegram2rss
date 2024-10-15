@@ -12,7 +12,7 @@ It allows you to stay in tune with any public channel without having an account 
 
 ## Deploy your own instance
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fakopachov%2Ftelegram2rss&env=HOSTING_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fakopachov%2Ftelegram2rss)
 
 ## API endpoints
 
