@@ -113,6 +113,9 @@ function generateTitle(descriptionNodes: AnyNode[], maxLength: number) {
     let match;
     while ((match = endOfSentence.exec(title)) != null) {
       if (match.index > maxLength) {
+        if (match.index < lastIndexInRange) {
+          lastIndexInRange = match.index;
+        }
         break;
       }
       lastIndexInRange = match.index;
