@@ -1,8 +1,10 @@
 import { handle } from 'hono/vercel';
-import app from '../src/app.js';
 
 export const config = {
-  runtime: 'edge',
+  runtime: process.env.VERCEL_RUNTIME || 'nodejs',
 };
 
-export const GET = handle(app);
+export const GET =
+  config.runtime === 'edge'
+    ? handle(await import('../src/app-edge.js').then(m => m.default))
+    : handle(await import('../src/app.js').then(m => m.default));
