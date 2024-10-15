@@ -44,7 +44,7 @@ app.get('/', swaggerUI({ url: '/doc' }));
 
 app.doc('/doc', {
   info: {
-    title: 'An API',
+    title: 'Telegram to RSS',
     version: 'v1',
   },
   openapi: '3.1.0',
