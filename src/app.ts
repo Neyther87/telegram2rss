@@ -10,6 +10,7 @@ app.openapi(
   createRoute({
     method: 'get',
     path: '/rss/{channel}',
+    summary: 'Get RSS feed for a Telegram channel',
     request: {
       params: z.object({
         channel: z.string(),
@@ -23,20 +24,50 @@ app.openapi(
       200: {
         description: 'RSS feed',
       },
+      400: {
+        description: 'Bad request',
+        content: {
+          'application/json': {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        content: {
+          'application/json': {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
     },
   }),
   async context => {
     const channel = context.req.param('channel');
+    if (!channel) {
+      context.status(400);
+      return context.json({ error: 'Channel name is required' });
+    }
+
     const postsCountRaw = context.req.query('count');
     const titleMaxLengthRaw = context.req.query('titleMaxLength');
     const postsCount = postsCountRaw ? Math.min(Number(postsCountRaw), 50) : undefined;
     const titleMaxLength = titleMaxLengthRaw ? Number(titleMaxLengthRaw) : undefined;
-    const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
-    context.header('Content-Type', 'application/rss+xml');
-    context.status(200);
-    return stream(context, async s => {
-      await buildFeed(channelInfo, s, { titleMaxLength: titleMaxLength });
-    });
+    try {
+      const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
+      context.header('Content-Type', 'application/rss+xml');
+      context.status(200);
+      return stream(context, async s => {
+        await buildFeed(channelInfo, s, { titleMaxLength: titleMaxLength });
+      });
+    } catch (e: any) {
+      context.status(500);
+      return context.json({ error: e.message });
+    }
   },
 );
 
