@@ -3,6 +3,7 @@ import { getChildren, innerText, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
 import { AnyNode } from 'domhandler';
+import { HostingUrl } from './hosting-utils.js';
 
 const WhitelistedAttributes = new Set<string>(['href', 'src', 'alt', 'title', 'target', 'rel']);
 const DefaultTitleMaxLength = 100;
@@ -21,7 +22,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
   await stream.write(`<title><![CDATA[${channel.title}]]></title>`);
   await stream.write(`<link><![CDATA[${channel.link}]]></link>`);
   await stream.write(`</image>`);
-  const rssLink = process.env.HOSTING_URL || '';
+  const rssLink = HostingUrl || '';
   await stream.write(`<link><![CDATA[${rssLink}]]></link>`);
   await stream.write(`<description><![CDATA[${channel.description}]]></description>`);
   await stream.write(`<generator>Telegram to RSS</generator>`);
