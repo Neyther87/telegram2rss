@@ -46,7 +46,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
     const mediaPreviews = post.media
       .map(m =>
         m.type === 'photo'
-          ? `<a href="${m.url}"><img style="max-width:100%" src="${m.url}" /></a>`
+          ? `<a href="${m.url}" rel="noopener noreferrer nofollow"><img style="max-width:100%" src="${m.url}" /></a>`
           : `<video style="max-width:100%" controls><source src="${m.url}" /></video>`,
       )
       .join('<br />');
