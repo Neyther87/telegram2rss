@@ -20,6 +20,7 @@
   "license": "GPL-3.0-only",
   "dependencies": {
     "css-select": "^5.1.0",
+    "date-fns": "^4.1.0",
     "dom-serializer": "^2.0.0",
     "domhandler": "^5.0.3",
     "domutils": "^3.1.0",

@@ -8,12 +8,14 @@ const app = new Hono();
 app.get('/rss/:channel', async context => {
   const channel = context.req.param('channel');
   const postsCountRaw = context.req.query('count');
+  const titleMaxLengthRaw = context.req.query('titleMaxLength');
   const postsCount = postsCountRaw ? Math.min(Number(postsCountRaw), 50) : undefined;
+  const titleMaxLength = titleMaxLengthRaw ? Number(titleMaxLengthRaw) : undefined;
   const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
   context.header('Content-Type', 'application/rss+xml');
   context.status(200);
   return stream(context, async s => {
-    await buildFeed(channelInfo, s);
+    await buildFeed(channelInfo, s, { titleMaxLength: titleMaxLength });
   });
 });
 

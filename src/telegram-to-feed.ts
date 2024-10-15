@@ -1,15 +1,17 @@
 import { Channel, Media } from './telegram-parser.js';
-import { getChildren, isTag, removeElement } from 'domutils';
+import { getChildren, innerText, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
+import { formatRFC7231 } from 'date-fns';
 import { AnyNode } from 'domhandler';
 
 const WhitelistedAttributes = new Set<string>(['href', 'src', 'alt', 'title', 'target', 'rel']);
+const DefaultTitleMaxLength = 100;
 
 export type WritableStreamLike = {
   write(input: string): Promise<WritableStreamLike>;
 };
 
-export async function buildFeed(channel: Channel, stream: WritableStreamLike) {
+export async function buildFeed(channel: Channel, stream: WritableStreamLike, options?: { titleMaxLength?: number }) {
   await stream.write(`<?xml version="1.0" encoding="UTF-8"?>\n`);
   await stream.write(`<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">`);
   await stream.write(`<channel>`);
@@ -24,7 +26,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike) {
   await stream.write(`<description><![CDATA[${channel.description}]]></description>`);
   await stream.write(`<generator>Telegram to RSS</generator>`);
   await stream.write(`<atom:link href="${rssLink}/rss/${channel.id}" rel="self" type="application/rss+xml" />`);
-  const lastUpdated = channel.posts[channel.posts.length - 1].date.toISOString();
+  const lastUpdated = formatRFC7231(channel.posts[channel.posts.length - 1].date);
   await stream.write(`<pubDate>${lastUpdated}</pubDate>`);
   await stream.write(`<lastBuildDate>${lastUpdated}</lastBuildDate>`);
   for (const post of channel.posts) {
@@ -37,11 +39,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike) {
       const toRender = getChildren(post.textHtml);
       sanitizeDescriptionHtml(toRender);
       description = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false });
-      const titleSeparatorMatch = /<br\s*\/?>/gi.exec(description);
-      title = description;
-      if (titleSeparatorMatch) {
-        title = description.slice(0, titleSeparatorMatch.index);
-      }
+      title = generateTitle(toRender, options?.titleMaxLength || DefaultTitleMaxLength);
     }
 
     await stream.write(`<title><![CDATA[${title}]]></title>`);
@@ -54,8 +52,8 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike) {
       .join('<br />');
     await stream.write(`<description><![CDATA[${mediaPreviews}<br />${description}]]></description>`);
     await stream.write(`<link><![CDATA[${post.link}]]></link>`);
-    await stream.write(`<guid>${post.id}</guid>`);
-    await stream.write(`<pubDate>${post.date.toISOString()}</pubDate>`);
+    await stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
+    await stream.write(`<pubDate>${formatRFC7231(post.date)}</pubDate>`);
     for (let i = 0; i < post.media.length; i++) {
       const media = post.media[i];
       const mediaInfo = await mediaInfos[i];
@@ -93,4 +91,36 @@ function sanitizeDescriptionHtml(nodes: AnyNode[]) {
       }
     }
   }
+}
+
+function generateTitle(descriptionNodes: AnyNode[], maxLength: number) {
+  const titleParts = [];
+  for (const node of descriptionNodes) {
+    if (isTag(node) && node.tagName === 'br') {
+      if (titleParts.length > 0) {
+        break;
+      }
+    } else {
+      titleParts.push(node);
+    }
+  }
+  let title = innerText(titleParts).trim();
+
+  if (title.length > maxLength) {
+    const endOfSentence = /[.!?]+\s/gi;
+    let lastIndexInRange = title.length;
+    let match;
+    while ((match = endOfSentence.exec(title)) != null) {
+      if (match.index > maxLength) {
+        break;
+      }
+      lastIndexInRange = match.index;
+    }
+
+    if (lastIndexInRange > 0 && lastIndexInRange < title.length) {
+      title = title.slice(0, lastIndexInRange + 1);
+    }
+  }
+
+  return title;
 }
