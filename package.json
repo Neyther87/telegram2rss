@@ -19,6 +19,8 @@
   "author": "",
   "license": "GPL-3.0-only",
   "dependencies": {
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.16.4",
     "css-select": "^5.1.0",
     "date-fns": "^4.1.0",
     "dom-serializer": "^2.0.0",
