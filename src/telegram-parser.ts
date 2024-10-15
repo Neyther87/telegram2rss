@@ -37,6 +37,7 @@ const MessageMediaSelector = CSSselect.compile('.tgme_widget_message_photo_wrap,
 const ChannelTitleSeceltor = CSSselect.compile('.tgme_channel_info_header_title');
 const ChannelDescriptionSelector = CSSselect.compile('.tgme_channel_info_description');
 const ChannelLogoSelector = CSSselect.compile('.tgme_channel_info_header .tgme_page_photo_image img');
+const MessageNotSupportedSelector = CSSselect.compile('.message_media_not_supported');
 
 async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
   if (!channel) {
@@ -86,6 +87,7 @@ function parseChannelPosts($html: Document): Post[] {
   for (const $message of $messages) {
     const $container = CSSselect.selectOne(MessageContainerSelector, $message) as unknown as Element;
     if (!$container) continue;
+    if (CSSselect.selectOne(MessageNotSupportedSelector, $container)) continue;
     const $date = CSSselect.selectOne(MessageDateSelector, $container);
     if (!$date) continue;
     const $media = CSSselect.selectAll(MessageMediaSelector, $container);
