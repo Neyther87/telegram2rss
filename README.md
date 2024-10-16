@@ -6,9 +6,11 @@ This is [RSS feed](https://en.wikipedia.org/wiki/RSS) generator for public [Tele
 It allows you to stay in tune with any public channel without having an account and being subscribed to that channel.
 
 ## Features
+
 * Fast and efficient
 * Full media support
 * Serverless and Edge compatible
+* One-click deployment to [Vercel](https://vercel.com/), [Netlify](https://www.netlify.com/) and [Cloudflare Workers](https://workers.cloudflare.com/)
 
 ## Deploy your own instance
 

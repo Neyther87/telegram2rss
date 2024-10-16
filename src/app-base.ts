@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
-import { stream } from 'hono/streaming';
 import { getChannelInfoWithPosts } from './telegram-parser.js';
 import { buildFeed } from './rss-feed-generator.js';
+import { PassThrough } from 'stream';
 
 export async function handleRSSRequest(context: Context) {
   const channel = context.req.param('channel');
@@ -16,11 +16,9 @@ export async function handleRSSRequest(context: Context) {
   const titleMaxLength = titleMaxLengthRaw ? Number(titleMaxLengthRaw) : undefined;
   try {
     const channelInfo = await getChannelInfoWithPosts(channel, { count: postsCount });
-    context.header('Content-Type', 'application/rss+xml');
-    context.status(200);
-    return stream(context, async s => {
-      await buildFeed(channelInfo, s, { titleMaxLength: titleMaxLength });
-    });
+    const stream = new PassThrough();
+    buildFeed(channelInfo, stream, { titleMaxLength: titleMaxLength }).then(() => stream.end());
+    return context.body(ReadableStream.from(stream), 200, { 'Content-Type': 'application/rss+xml' });
   } catch (e: any) {
     context.status(500);
     return context.json({ error: e.message });
