@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/akopachov/sveltab)](/LICENSE)
 
-This is [RSS feed](https://en.wikipedia.org/wiki/RSS) generator for public [Telegram](https://telegram.org/) channels.
+[RSS feed](https://en.wikipedia.org/wiki/RSS) generator for public [Telegram](https://telegram.org/) channels.
 It allows you to stay in tune with any public channel without having an account and being subscribed to that channel.
 
 ## Features
