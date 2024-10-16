@@ -14,6 +14,8 @@ It allows you to stay in tune with any public channel without having an account 
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fakopachov%2Ftelegram2rss)
 
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/akopachov/telegram2rss)
+
 ## API endpoints
 
 Main endpoint format is `{deploy_url}/rss/{channel_name}`, where `{deploy_url}` is a URL where application is deployed, `{channel_name}` is a Telegram public channel name. As a response, this endpoint returns the RSS v2.0 feed of the given Telegram channel.

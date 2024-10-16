@@ -7,3 +7,6 @@
 [build]
   command = "pnpm netlify-build"
   publish = "public"
+
+[template.environment]
+  HOSTING_URL = "change me for the URL where app is going to be hosted"
