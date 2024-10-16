@@ -3,32 +3,35 @@ import { getChildren, innerText, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
 import type { AnyNode } from 'domhandler';
-import type { Writable } from 'stream';
 import { HostingUrl } from './hosting-utils.js';
 
 const WhitelistedAttributes = new Set<string>(['href', 'src', 'alt', 'title', 'target', 'rel']);
 const DefaultTitleMaxLength = 100;
 
-export async function buildFeed(channel: Channel, stream: Writable, options?: { titleMaxLength?: number }) {
-  stream.write(`<?xml version="1.0" encoding="UTF-8"?>\n`);
-  stream.write(`<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">`);
-  stream.write(`<channel>`);
-  stream.write(`<title><![CDATA[${channel.title}]]></title>`);
-  stream.write(`<image>`);
-  stream.write(`<url><![CDATA[${channel.logoUrl}]]></url>`);
-  stream.write(`<title><![CDATA[${channel.title}]]></title>`);
-  stream.write(`<link><![CDATA[${channel.link}]]></link>`);
-  stream.write(`</image>`);
+export type WritableStreamLike = {
+  write(input: string): Promise<WritableStreamLike>;
+};
+
+export async function buildFeed(channel: Channel, stream: WritableStreamLike, options?: { titleMaxLength?: number }) {
+  await stream.write(`<?xml version="1.0" encoding="UTF-8"?>\n`);
+  await stream.write(`<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">`);
+  await stream.write(`<channel>`);
+  await stream.write(`<title><![CDATA[${channel.title}]]></title>`);
+  await stream.write(`<image>`);
+  await stream.write(`<url><![CDATA[${channel.logoUrl}]]></url>`);
+  await stream.write(`<title><![CDATA[${channel.title}]]></title>`);
+  await stream.write(`<link><![CDATA[${channel.link}]]></link>`);
+  await stream.write(`</image>`);
   const rssLink = HostingUrl || '';
-  stream.write(`<link><![CDATA[${rssLink}]]></link>`);
-  stream.write(`<description><![CDATA[${channel.description}]]></description>`);
-  stream.write(`<generator>Telegram to RSS</generator>`);
-  stream.write(`<atom:link href="${rssLink}/rss/${channel.id}" rel="self" type="application/rss+xml" />`);
+  await stream.write(`<link><![CDATA[${rssLink}]]></link>`);
+  await stream.write(`<description><![CDATA[${channel.description}]]></description>`);
+  await stream.write(`<generator>Telegram to RSS</generator>`);
+  await stream.write(`<atom:link href="${rssLink}/rss/${channel.id}" rel="self" type="application/rss+xml" />`);
   const lastUpdated = formatRFC7231(channel.posts[channel.posts.length - 1].date);
-  stream.write(`<pubDate>${lastUpdated}</pubDate>`);
-  stream.write(`<lastBuildDate>${lastUpdated}</lastBuildDate>`);
+  await stream.write(`<pubDate>${lastUpdated}</pubDate>`);
+  await stream.write(`<lastBuildDate>${lastUpdated}</lastBuildDate>`);
   for (const post of channel.posts) {
-    stream.write(`<item>`);
+    await stream.write(`<item>`);
 
     const mediaInfos = post.media.map(getMediaInfo);
     let title = '';
@@ -40,21 +43,21 @@ export async function buildFeed(channel: Channel, stream: Writable, options?: { 
       title = generateTitle(toRender, options?.titleMaxLength || DefaultTitleMaxLength);
     }
 
-    stream.write(`<title><![CDATA[${title}]]></title>`);
+    await stream.write(`<title><![CDATA[${title}]]></title>`);
     const mediaPreviews = post.media.map(generateMedia).join('<br />');
-    stream.write(`<description><![CDATA[${mediaPreviews}<br />${description}]]></description>`);
-    stream.write(`<link><![CDATA[${post.link}]]></link>`);
-    stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
-    stream.write(`<pubDate>${formatRFC7231(post.date)}</pubDate>`);
+    await stream.write(`<description><![CDATA[${mediaPreviews}<br />${description}]]></description>`);
+    await stream.write(`<link><![CDATA[${post.link}]]></link>`);
+    await stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
+    await stream.write(`<pubDate>${formatRFC7231(post.date)}</pubDate>`);
     for (let i = 0; i < post.media.length; i++) {
       const media = post.media[i];
       const mediaInfo = await mediaInfos[i];
-      stream.write(`<enclosure url="${media.url}" type="${mediaInfo.type}" length="${mediaInfo.size}" />`);
+      await stream.write(`<enclosure url="${media.url}" type="${mediaInfo.type}" length="${mediaInfo.size}" />`);
     }
-    stream.write(`</item>`);
+    await stream.write(`</item>`);
   }
-  stream.write(`</channel>`);
-  stream.write(`</rss>`);
+  await stream.write(`</channel>`);
+  await stream.write(`</rss>`);
 }
 
 function generateMedia(media: Media) {
