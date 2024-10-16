@@ -135,3 +135,5 @@ dist
 .netlify
 
 netlify/edge-functions/index.js
+
+.wrangler
