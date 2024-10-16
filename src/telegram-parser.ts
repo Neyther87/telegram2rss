@@ -5,7 +5,7 @@ import { innerText } from 'domutils';
 import { innerTextEx } from './domutils-extensions.js';
 
 export type Media = {
-  type: 'photo' | 'video';
+  type: 'photo' | 'video' | 'audio';
   url: string;
 };
 
@@ -33,11 +33,15 @@ const MessageSelector = CSSselect.compile('.tgme_widget_message_wrap');
 const MessageContainerSelector = CSSselect.compile('.tgme_widget_message');
 const MessageTextSelector = CSSselect.compile('.tgme_widget_message_text');
 const MessageDateSelector = CSSselect.compile('.tgme_widget_message_date .time');
-const MessageMediaSelector = CSSselect.compile('.tgme_widget_message_photo_wrap,.tgme_widget_message_video_wrap video');
+const MessageMediaSelector = CSSselect.compile(
+  '.tgme_widget_message_photo_wrap,.tgme_widget_message_video_wrap video,.tgme_widget_message_roundvideo_wrap video,.tgme_widget_message_voice_player audio',
+);
 const ChannelTitleSeceltor = CSSselect.compile('.tgme_channel_info_header_title');
 const ChannelDescriptionSelector = CSSselect.compile('.tgme_channel_info_description');
 const ChannelLogoSelector = CSSselect.compile('.tgme_channel_info_header .tgme_page_photo_image img');
-const MessageNotSupportedSelector = CSSselect.compile('.message_media_not_supported');
+const MessageNotSupportedSelector = CSSselect.compile(
+  '.tgme_widget_message_bubble > .message_media_not_supported_wrap',
+);
 
 async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
   if (!channel) {
@@ -96,6 +100,11 @@ function parseChannelPosts($html: Document): Post[] {
       if ($m.tagName.toLowerCase() == 'video') {
         media.push({
           type: 'video',
+          url: $m.attribs!.src,
+        });
+      } else if ($m.tagName.toLowerCase() == 'audio') {
+        media.push({
+          type: 'audio',
           url: $m.attribs!.src,
         });
       } else {

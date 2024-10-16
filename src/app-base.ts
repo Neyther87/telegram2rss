@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { stream } from 'hono/streaming';
 import { getChannelInfoWithPosts } from './telegram-parser.js';
-import { buildFeed } from './telegram-to-feed.js';
+import { buildFeed } from './rss-feed-generator.js';
 
 export async function handleRSSRequest(context: Context) {
   const channel = context.req.param('channel');

@@ -44,13 +44,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
     }
 
     await stream.write(`<title><![CDATA[${title}]]></title>`);
-    const mediaPreviews = post.media
-      .map(m =>
-        m.type === 'photo'
-          ? `<a href="${m.url}" rel="noopener noreferrer nofollow"><img style="max-width:100%" src="${m.url}" /></a>`
-          : `<video style="max-width:100%" controls><source src="${m.url}" /></video>`,
-      )
-      .join('<br />');
+    const mediaPreviews = post.media.map(generateMedia).join('<br />');
     await stream.write(`<description><![CDATA[${mediaPreviews}<br />${description}]]></description>`);
     await stream.write(`<link><![CDATA[${post.link}]]></link>`);
     await stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
@@ -64,6 +58,19 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
   }
   await stream.write(`</channel>`);
   await stream.write(`</rss>`);
+}
+
+function generateMedia(media: Media) {
+  switch (media.type) {
+    case 'photo':
+      return `<a href="${media.url}" rel="noopener noreferrer nofollow"><img style="max-width:100%" src="${media.url}" /></a>`;
+    case 'video':
+      return `<video style="max-width:100%" controls><source src="${media.url}" /></video>`;
+    case 'audio':
+      return `<audio src="${media.url}" style="max-width:100%" controls></audio>`;
+    default:
+      return '';
+  }
 }
 
 async function getMediaInfo(media: Media) {
