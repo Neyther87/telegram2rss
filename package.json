@@ -12,6 +12,7 @@
   "scripts": {
     "build": "esbuild src/app.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external",
     "vercel-build": "echo 'vercel-build'",
+    "netlify-build": "esbuild src/app-netlify.ts --bundle --platform=node --outfile=netlify/edge-functions/index.js --format=esm --external:jsr:@hono/hono --external:jsr:@hono/hono/netlify",
     "watch": "esbuild src/app.ts --bundle --platform=node --outfile=dist/index.js --format=esm --packages=external --watch",
     "dev": "concurrently --kill-others \"npm run watch\" \"dotenvx run -- nodemon ./dist/index.js\""
   },

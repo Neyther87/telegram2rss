@@ -1,8 +1,8 @@
-import { Channel, Media } from './telegram-parser.js';
+import type { Channel, Media } from './telegram-parser.js';
 import { getChildren, innerText, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
-import { AnyNode } from 'domhandler';
+import type { AnyNode } from 'domhandler';
 import { HostingUrl } from './hosting-utils.js';
 
 const WhitelistedAttributes = new Set<string>(['href', 'src', 'alt', 'title', 'target', 'rel']);

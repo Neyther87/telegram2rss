@@ -1,0 +1,9 @@
+[functions]
+  node_bundler = "esbuild"
+
+[build.environment]
+  PNPM_FLAGS="--frozen-lockfile"
+
+[build]
+  command = "pnpm netlify-build"
+  publish = "public"

@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { stream } from 'hono/streaming';
 import { getChannelInfoWithPosts } from './telegram-parser.js';
 import { buildFeed } from './rss-feed-generator.js';

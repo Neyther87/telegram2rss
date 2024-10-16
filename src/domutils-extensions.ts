@@ -1,5 +1,5 @@
 import { hasChildren, isCDATA, isText } from 'domutils';
-import { AnyNode } from 'domhandler';
+import type { AnyNode } from 'domhandler';
 import { ElementType } from 'htmlparser2';
 
 export function innerTextEx(node: AnyNode | AnyNode[], separator: string): string {

@@ -1,6 +1,6 @@
 import * as htmlparser2 from 'htmlparser2';
 import * as CSSselect from 'css-select';
-import { Document, Element } from 'domhandler';
+import type { Document, Element } from 'domhandler';
 import { innerText } from 'domutils';
 import { innerTextEx } from './domutils-extensions.js';
 
