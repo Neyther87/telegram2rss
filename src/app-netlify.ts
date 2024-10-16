@@ -1,5 +1,5 @@
-import { Hono } from 'jsr:@hono/hono';
-import { handle } from 'jsr:@hono/hono/netlify';
+import { Hono } from 'https://deno.land/x/hono/mod.ts';
+import { handle } from 'https://deno.land/x/hono/adapter/netlify/mod.ts';
 import { handleRSSRequest } from './app-base.js';
 
 const app = new Hono();
