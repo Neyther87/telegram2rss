@@ -1,9 +1,10 @@
 import type { Channel, Media } from './telegram-parser.js';
-import { getChildren, innerText, isTag, removeElement } from 'domutils';
+import { getChildren, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
 import type { AnyNode } from 'domhandler';
 import { HostingUrl } from './hosting-utils.js';
+import { innerTextUntil } from './domutils-extensions.js';
 
 const WhitelistedAttributes = new Set<string>(['href', 'src', 'alt', 'title', 'target', 'rel']);
 const DefaultTitleMaxLength = 100;
@@ -102,17 +103,7 @@ function sanitizeDescriptionHtml(nodes: AnyNode[]) {
 }
 
 function generateTitle(descriptionNodes: AnyNode[], maxLength: number) {
-  const titleParts = [];
-  for (const node of descriptionNodes) {
-    if (isTag(node) && node.tagName === 'br') {
-      if (titleParts.length > 0) {
-        break;
-      }
-    } else {
-      titleParts.push(node);
-    }
-  }
-  let title = innerText(titleParts).trim();
+  let title = innerTextUntil(descriptionNodes, 'br').trim();
 
   if (title.length > maxLength) {
     const endOfSentence = /[.!?]+\s/gi;
