@@ -1,4 +1,4 @@
-import type { Channel, Media } from './telegram-parser.js';
+import type { Channel, Media, Poll } from './telegram-parser.js';
 import { getChildren, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
@@ -43,10 +43,17 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
       description = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false });
       title = generateTitle(toRender, options?.titleMaxLength || DefaultTitleMaxLength);
     }
+    if (post.poll) {
+      if (!title) {
+        title = post.poll.title;
+      }
+      description += generatePoll(post.poll);
+    }
 
     await stream.write(`<title><![CDATA[${title}]]></title>`);
     const mediaPreviews = post.media.map(generateMedia).join('<br />');
-    await stream.write(`<description><![CDATA[${mediaPreviews}<br />${description}]]></description>`);
+    const combinedDescription = [mediaPreviews, description].filter(e => !!e).join('<br />');
+    await stream.write(`<description><![CDATA[${combinedDescription}]]></description>`);
     await stream.write(`<link><![CDATA[${post.link}]]></link>`);
     await stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
     await stream.write(`<pubDate>${formatRFC7231(post.date)}</pubDate>`);
@@ -72,6 +79,15 @@ function generateMedia(media: Media) {
     default:
       return '';
   }
+}
+
+function generatePoll(poll: Poll) {
+  const parts = [`<div><h4>${poll.title}</h4><table style="border-spacing: 1rem 0;"><tbody>`];
+  for (const option of poll.options) {
+    parts.push(`<tr><td>${option.percent}&percnt;</td><td>${option.text}</td></tr>`);
+  }
+  parts.push('</tbody></table></div>');
+  return parts.join('');
 }
 
 async function getMediaInfo(media: Media) {

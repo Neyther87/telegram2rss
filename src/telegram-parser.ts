@@ -9,12 +9,21 @@ export type Media = {
   url: string;
 };
 
+export type Poll = {
+  title: string;
+  options: {
+    text: string;
+    percent: number;
+  }[];
+};
+
 export type Post = {
   textHtml: Element | null;
   link: string;
   date: Date;
   id: number;
   media: Media[];
+  poll?: Poll;
 };
 
 export type ChannelInfo = {
@@ -42,6 +51,11 @@ const ChannelLogoSelector = CSSselect.compile('.tgme_channel_info_header .tgme_p
 const MessageNotSupportedSelector = CSSselect.compile(
   '.tgme_widget_message_bubble > .message_media_not_supported_wrap',
 );
+const MessagePollSelector = CSSselect.compile('.tgme_widget_message_poll');
+const MessagePollTitleSelector = CSSselect.compile('.tgme_widget_message_poll_question');
+const MessagePollOptionSelector = CSSselect.compile('.tgme_widget_message_poll_option');
+const MessagePollOptionPercentSelector = CSSselect.compile('.tgme_widget_message_poll_option_percent');
+const MessagePollOptionTextSelector = CSSselect.compile('.tgme_widget_message_poll_option_text');
 
 async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
   if (!channel) {
@@ -120,12 +134,36 @@ function parseChannelPosts($html: Document): Post[] {
     }
     const relativeRef = $container.attribs!['data-post'] as unknown as string;
     const $text = CSSselect.selectOne(MessageTextSelector, $container);
+
+    const $pollContainer = CSSselect.selectOne(MessagePollSelector, $container);
+    let poll: Poll | undefined = undefined;
+    if ($pollContainer) {
+      const $title = CSSselect.selectOne(MessagePollTitleSelector, $pollContainer);
+      poll = {
+        title: $title ? innerText($title) : '',
+        options: [],
+      };
+
+      const $options = CSSselect.selectAll(MessagePollOptionSelector, $pollContainer);
+      for (const $option of $options) {
+        const $percent = CSSselect.selectOne(MessagePollOptionPercentSelector, $option);
+        const $text = CSSselect.selectOne(MessagePollOptionTextSelector, $option);
+        if ($text && $percent) {
+          poll!.options.push({
+            text: innerText($text),
+            percent: $percent ? parseInt(innerText($percent), 10) : 0,
+          });
+        }
+      }
+    }
+
     posts.push({
       textHtml: $text,
       link: `https://t.me/s/${relativeRef}`,
       date: new Date($date!.attribs!.datetime),
       id: Number(relativeRef.split('/')[1]),
       media: media,
+      poll: poll,
     });
   }
 
