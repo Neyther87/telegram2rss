@@ -118,79 +118,90 @@ function parseChannelPosts($html: Document): Post[] {
     if (CSSselect.selectOne(MessageNotSupportedSelector, $container)) continue;
     const $date = CSSselect.selectOne(MessageDateSelector, $container);
     if (!$date) continue;
-    const $media = CSSselect.selectAll(MessageMediaSelector, $container);
-    const media: Media[] = [];
-    for (const $m of $media) {
-      if ($m.tagName.toLowerCase() == 'video') {
-        media.push({
-          type: 'video',
-          url: $m.attribs!.src,
-        });
-      } else if ($m.tagName.toLowerCase() == 'audio') {
-        media.push({
-          type: 'audio',
-          url: $m.attribs!.src,
-        });
-      } else {
-        const style = $m.attribs!.style;
-        const match = /background-image:\s*url\('?(.*)'?\)/.exec(style);
-        if (match) {
-          media.push({
-            type: 'photo',
-            url: match[1],
-          });
-        }
-      }
-    }
     const relativeRef = $container.attribs!['data-post'];
     const $text = CSSselect.selectOne(MessageTextSelector, $container);
-
-    const $pollContainer = CSSselect.selectOne(MessagePollSelector, $container);
-    let poll: Poll | undefined = undefined;
-    if ($pollContainer) {
-      const $title = CSSselect.selectOne(MessagePollTitleSelector, $pollContainer);
-      poll = {
-        title: $title ? innerText($title) : '',
-        options: [],
-      };
-
-      const $options = CSSselect.selectAll(MessagePollOptionSelector, $pollContainer);
-      for (const $option of $options) {
-        const $percent = CSSselect.selectOne(MessagePollOptionPercentSelector, $option);
-        const $text = CSSselect.selectOne(MessagePollOptionTextSelector, $option);
-        if ($text && $percent) {
-          poll!.options.push({
-            text: innerText($text),
-            percent: $percent ? parseInt(innerText($percent), 10) : 0,
-          });
-        }
-      }
-    }
-
-    const $reply = CSSselect.selectOne(MessageReplySelector, $container);
-    let reply: Reply | undefined = undefined;
-    if ($reply) {
-      const $replyText = CSSselect.selectOne('.tgme_widget_message_text,.tgme_widget_message_metatext', $reply);
-      const $replyAuthor = CSSselect.selectOne('.tgme_widget_message_author', $reply);
-      reply = {
-        textHtml: $replyText,
-        author: $replyAuthor ? innerText($replyAuthor) : '',
-        link: ensureTLinkIsWebLink($reply.attribs!.href),
-      };
-    }
 
     posts.push({
       textHtml: $text,
       link: `https://t.me/s/${relativeRef}`,
       date: new Date($date!.attribs!.datetime),
       id: Number(relativeRef.split('/')[1]),
-      media: media,
-      poll: poll,
-      reply: reply,
+      media: parseMedia($container),
+      poll: parsePool($container),
+      reply: parseReply($container),
     });
   }
 
   return posts;
+}
+
+function parseMedia(container: Element): Media[] {
+  const $media = CSSselect.selectAll(MessageMediaSelector, container);
+  const media: Media[] = [];
+  for (const $m of $media) {
+    if ($m.tagName.toLowerCase() == 'video') {
+      media.push({
+        type: 'video',
+        url: $m.attribs!.src,
+      });
+    } else if ($m.tagName.toLowerCase() == 'audio') {
+      media.push({
+        type: 'audio',
+        url: $m.attribs!.src,
+      });
+    } else {
+      const style = $m.attribs!.style;
+      const match = /background-image:\s*url\('?(.*)'?\)/.exec(style);
+      if (match) {
+        media.push({
+          type: 'photo',
+          url: match[1],
+        });
+      }
+    }
+  }
+
+  return media;
+}
+
+function parsePool(container: Element): Poll | undefined {
+  const $pollContainer = CSSselect.selectOne(MessagePollSelector, container);
+  if ($pollContainer) {
+    const $title = CSSselect.selectOne(MessagePollTitleSelector, $pollContainer);
+    const poll: Poll = {
+      title: $title ? innerText($title) : '',
+      options: [],
+    };
+
+    const $options = CSSselect.selectAll(MessagePollOptionSelector, $pollContainer);
+    for (const $option of $options) {
+      const $percent = CSSselect.selectOne(MessagePollOptionPercentSelector, $option);
+      const $text = CSSselect.selectOne(MessagePollOptionTextSelector, $option);
+      if ($text && $percent) {
+        poll!.options.push({
+          text: innerText($text),
+          percent: $percent ? parseInt(innerText($percent), 10) : 0,
+        });
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function parseReply(container: Element): Reply | undefined {
+  const $reply = CSSselect.selectOne(MessageReplySelector, container);
+  if ($reply) {
+    const $replyText = CSSselect.selectOne('.tgme_widget_message_text,.tgme_widget_message_metatext', $reply);
+    const $replyAuthor = CSSselect.selectOne('.tgme_widget_message_author', $reply);
+    return {
+      textHtml: $replyText,
+      author: $replyAuthor ? innerText($replyAuthor) : '',
+      link: ensureTLinkIsWebLink($reply.attribs!.href),
+    };
+  }
+
+  return undefined;
 }
 
 function ensureTLinkIsWebLink(link: string) {
