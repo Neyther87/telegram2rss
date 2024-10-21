@@ -47,7 +47,9 @@ export type Channel = ChannelInfo & {
 
 const MessageSelector = CSSselect.compile('.tgme_widget_message_wrap');
 const MessageContainerSelector = CSSselect.compile('.tgme_widget_message');
-const MessageTextSelector = CSSselect.compile('.tgme_widget_message_bubble > .tgme_widget_message_text');
+const MessageTextSelector = CSSselect.compile(
+  '.tgme_widget_message_bubble > .tgme_widget_message_text,.tgme_widget_message_bubble > .media_supported_cont .tgme_widget_message_text',
+);
 const MessageReplySelector = CSSselect.compile('.tgme_widget_message_bubble > .tgme_widget_message_reply');
 const MessageDateSelector = CSSselect.compile('.tgme_widget_message_date .time');
 const MessageMediaSelector = CSSselect.compile(
