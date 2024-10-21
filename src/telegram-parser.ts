@@ -170,7 +170,7 @@ function parseChannelPosts($html: Document): Post[] {
     const $reply = CSSselect.selectOne(MessageReplySelector, $container);
     let reply: Reply | undefined = undefined;
     if ($reply) {
-      const $replyText = CSSselect.selectOne('.tgme_widget_message_text', $reply);
+      const $replyText = CSSselect.selectOne('.tgme_widget_message_text,.tgme_widget_message_metatext', $reply);
       const $replyAuthor = CSSselect.selectOne('.tgme_widget_message_author', $reply);
       reply = {
         textHtml: $replyText,
