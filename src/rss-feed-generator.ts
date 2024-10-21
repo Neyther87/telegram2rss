@@ -1,4 +1,4 @@
-import type { Channel, Media, Poll } from './telegram-parser.js';
+import type { Channel, Media, Poll, Reply } from './telegram-parser.js';
 import { getChildren, isTag, removeElement } from 'domutils';
 import render from 'dom-serializer';
 import { formatRFC7231 } from 'date-fns';
@@ -26,7 +26,7 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
   const rssLink = HostingUrl || '';
   await stream.write(`<link><![CDATA[${rssLink}]]></link>`);
   await stream.write(`<description><![CDATA[${channel.description}]]></description>`);
-  await stream.write(`<generator>Telegram to RSS</generator>`);
+  await stream.write(`<generator>Telegram to RSS (https://github.com/akopachov/telegram2rss)</generator>`);
   await stream.write(`<atom:link href="${rssLink}/rss/${channel.id}" rel="self" type="application/rss+xml" />`);
   const lastUpdated = formatRFC7231(channel.posts[channel.posts.length - 1].date);
   await stream.write(`<pubDate>${lastUpdated}</pubDate>`);
@@ -37,6 +37,8 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
     const mediaInfos = post.media.map(getMediaInfo);
     let title = '';
     let description = '';
+    let poll = '';
+    let reply = '';
     if (post.textHtml) {
       const toRender = getChildren(post.textHtml);
       sanitizeDescriptionHtml(toRender);
@@ -47,13 +49,17 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
       if (!title) {
         title = post.poll.title;
       }
-      description += generatePoll(post.poll);
+      poll = generatePoll(post.poll);
+    }
+
+    if (post.reply) {
+      reply = generateReply(post.reply);
     }
 
     await stream.write(`<title><![CDATA[${title}]]></title>`);
     const mediaPreviews = post.media.map(generateMedia).join('<br />');
-    const combinedDescription = [mediaPreviews, description].filter(e => !!e).join('<br />');
-    await stream.write(`<description><![CDATA[${combinedDescription}]]></description>`);
+    const combinedDescription = [mediaPreviews, description, poll].filter(e => !!e).join('<br />');
+    await stream.write(`<description><![CDATA[${reply}${combinedDescription}]]></description>`);
     await stream.write(`<link><![CDATA[${post.link}]]></link>`);
     await stream.write(`<guid>t.me/s/${channel.id}/${post.id}</guid>`);
     await stream.write(`<pubDate>${formatRFC7231(post.date)}</pubDate>`);
@@ -88,6 +94,14 @@ function generatePoll(poll: Poll) {
   }
   parts.push('</tbody></table></div>');
   return parts.join('');
+}
+
+function generateReply(reply: Reply) {
+  let replyText = '';
+  if (reply.textHtml) {
+    replyText = render(getChildren(reply.textHtml), { xmlMode: false, selfClosingTags: true, encodeEntities: false });
+  }
+  return `<a href="${reply.link}" rel="noopener noreferrer nofollow"><blockquote style="padding-left:6px;margin:0;border-left:3px solid #64b5ef;font-style:normal;" cite="${reply.link}"><h4 style="font-weight:600;color:LinkText;margin:0;">${reply.author}</h4><p style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin:0;color:initial;">${replyText}<p></blockquote></a>`;
 }
 
 async function getMediaInfo(media: Media) {

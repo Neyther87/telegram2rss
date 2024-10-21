@@ -17,6 +17,12 @@ export type Poll = {
   }[];
 };
 
+export type Reply = {
+  textHtml: Element | null;
+  author: string;
+  link: string;
+};
+
 export type Post = {
   textHtml: Element | null;
   link: string;
@@ -24,6 +30,7 @@ export type Post = {
   id: number;
   media: Media[];
   poll?: Poll;
+  reply?: Reply;
 };
 
 export type ChannelInfo = {
@@ -40,7 +47,8 @@ export type Channel = ChannelInfo & {
 
 const MessageSelector = CSSselect.compile('.tgme_widget_message_wrap');
 const MessageContainerSelector = CSSselect.compile('.tgme_widget_message');
-const MessageTextSelector = CSSselect.compile('.tgme_widget_message_text');
+const MessageTextSelector = CSSselect.compile('.tgme_widget_message_bubble > .tgme_widget_message_text');
+const MessageReplySelector = CSSselect.compile('.tgme_widget_message_bubble > .tgme_widget_message_reply');
 const MessageDateSelector = CSSselect.compile('.tgme_widget_message_date .time');
 const MessageMediaSelector = CSSselect.compile(
   '.tgme_widget_message_photo_wrap,.tgme_widget_message_video_wrap video,.tgme_widget_message_roundvideo_wrap video,.tgme_widget_message_voice_player audio',
@@ -132,7 +140,7 @@ function parseChannelPosts($html: Document): Post[] {
         }
       }
     }
-    const relativeRef = $container.attribs!['data-post'] as unknown as string;
+    const relativeRef = $container.attribs!['data-post'];
     const $text = CSSselect.selectOne(MessageTextSelector, $container);
 
     const $pollContainer = CSSselect.selectOne(MessagePollSelector, $container);
@@ -157,6 +165,18 @@ function parseChannelPosts($html: Document): Post[] {
       }
     }
 
+    const $reply = CSSselect.selectOne(MessageReplySelector, $container);
+    let reply: Reply | undefined = undefined;
+    if ($reply) {
+      const $replyText = CSSselect.selectOne('.tgme_widget_message_text', $reply);
+      const $replyAuthor = CSSselect.selectOne('.tgme_widget_message_author', $reply);
+      reply = {
+        textHtml: $replyText,
+        author: $replyAuthor ? innerText($replyAuthor) : '',
+        link: ensureTLinkIsWebLink($reply.attribs!.href),
+      };
+    }
+
     posts.push({
       textHtml: $text,
       link: `https://t.me/s/${relativeRef}`,
@@ -164,10 +184,21 @@ function parseChannelPosts($html: Document): Post[] {
       id: Number(relativeRef.split('/')[1]),
       media: media,
       poll: poll,
+      reply: reply,
     });
   }
 
   return posts;
+}
+
+function ensureTLinkIsWebLink(link: string) {
+  const url = new URL(link);
+  if (url.hostname.toLowerCase() === 't.me' && !url.pathname.toLowerCase().startsWith('/s/')) {
+    url.pathname = `/s${url.pathname}`;
+    return url.toString();
+  }
+
+  return link;
 }
 
 export async function getChannelInfoWithPosts(channel: string, options?: { count?: number }): Promise<Channel> {
