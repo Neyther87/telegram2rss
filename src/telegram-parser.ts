@@ -126,16 +126,16 @@ function parseChannelPosts($html: Document): Post[] {
       link: `https://t.me/s/${relativeRef}`,
       date: new Date($date!.attribs!.datetime),
       id: Number(relativeRef.split('/')[1]),
-      media: parseMedia($container),
-      poll: parsePool($container),
-      reply: parseReply($container),
+      media: parsePostMedia($container),
+      poll: parsePostPool($container),
+      reply: parsePostReply($container),
     });
   }
 
   return posts;
 }
 
-function parseMedia(container: Element): Media[] {
+function parsePostMedia(container: Element): Media[] {
   const $media = CSSselect.selectAll(MessageMediaSelector, container);
   const media: Media[] = [];
   for (const $m of $media) {
@@ -164,7 +164,7 @@ function parseMedia(container: Element): Media[] {
   return media;
 }
 
-function parsePool(container: Element): Poll | undefined {
+function parsePostPool(container: Element): Poll | undefined {
   const $pollContainer = CSSselect.selectOne(MessagePollSelector, container);
   if ($pollContainer) {
     const $title = CSSselect.selectOne(MessagePollTitleSelector, $pollContainer);
@@ -189,7 +189,7 @@ function parsePool(container: Element): Poll | undefined {
   return undefined;
 }
 
-function parseReply(container: Element): Reply | undefined {
+function parsePostReply(container: Element): Reply | undefined {
   const $reply = CSSselect.selectOne(MessageReplySelector, container);
   if ($reply) {
     const $replyText = CSSselect.selectOne('.tgme_widget_message_text,.tgme_widget_message_metatext', $reply);
