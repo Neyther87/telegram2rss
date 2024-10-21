@@ -130,7 +130,7 @@
       const btnCopyText = document.getElementById('btnCopyText');
       function updateRssFeedUrl() {
         if (channel.value) {
-          rssFeedUrl.value = `${location}/${channel.value}`;
+          rssFeedUrl.value = `${location}rss/${channel.value}`;
           rssFeedContainer.style.display = 'flex';
         } else {
           rssFeedContainer.style.display = 'none';
