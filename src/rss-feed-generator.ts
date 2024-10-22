@@ -91,7 +91,7 @@ function generatePoll(poll: Poll) {
   const toRender = poll.title ? getChildren(poll.title) : [];
   sanitizeHtml(toRender);
   const title = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false }) || '';
-  const parts = [`<div><h4>${title}</h4><table style="border-spacing: 1rem 0;"><tbody>`];
+  const parts = [`<div><div>${title}</div><table style="border-spacing: 1rem 0;"><tbody>`];
   for (const option of poll.options) {
     parts.push(`<tr><td>${option.percent}&percnt;</td><td>${option.text}</td></tr>`);
   }
