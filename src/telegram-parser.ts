@@ -10,7 +10,7 @@ export type Media = {
 };
 
 export type Poll = {
-  title: string;
+  title: Element | null;
   options: {
     text: string;
     percent: number;
@@ -169,7 +169,7 @@ function parsePostPool(container: Element): Poll | undefined {
   if ($pollContainer) {
     const $title = CSSselect.selectOne(MessagePollTitleSelector, $pollContainer);
     const poll: Poll = {
-      title: $title ? innerText($title) : '',
+      title: $title,
       options: [],
     };
 
@@ -184,6 +184,8 @@ function parsePostPool(container: Element): Poll | undefined {
         });
       }
     }
+
+    return poll;
   }
 
   return undefined;

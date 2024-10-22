@@ -41,13 +41,13 @@ export async function buildFeed(channel: Channel, stream: WritableStreamLike, op
     let reply = '';
     if (post.textHtml) {
       const toRender = getChildren(post.textHtml);
-      sanitizeDescriptionHtml(toRender);
+      sanitizeHtml(toRender);
       description = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false });
       title = generateTitle(toRender, options?.titleMaxLength || DefaultTitleMaxLength);
     }
     if (post.poll) {
-      if (!title) {
-        title = post.poll.title;
+      if (!title && post.poll.title) {
+        title = generateTitle(getChildren(post.poll.title), options?.titleMaxLength || DefaultTitleMaxLength);
       }
       poll = generatePoll(post.poll);
     }
@@ -88,7 +88,10 @@ function generateMedia(media: Media) {
 }
 
 function generatePoll(poll: Poll) {
-  const parts = [`<div><h4>${poll.title}</h4><table style="border-spacing: 1rem 0;"><tbody>`];
+  const toRender = poll.title ? getChildren(poll.title) : [];
+  sanitizeHtml(toRender);
+  const title = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false }) || '';
+  const parts = [`<div><h4>${title}</h4><table style="border-spacing: 1rem 0;"><tbody>`];
   for (const option of poll.options) {
     parts.push(`<tr><td>${option.percent}&percnt;</td><td>${option.text}</td></tr>`);
   }
@@ -99,7 +102,9 @@ function generatePoll(poll: Poll) {
 function generateReply(reply: Reply) {
   let replyText = '';
   if (reply.textHtml) {
-    replyText = render(getChildren(reply.textHtml), { xmlMode: false, selfClosingTags: true, encodeEntities: false });
+    const toRender = getChildren(reply.textHtml);
+    sanitizeHtml(toRender);
+    replyText = render(toRender, { xmlMode: false, selfClosingTags: true, encodeEntities: false });
   }
   return `<a href="${reply.link}" rel="noopener noreferrer nofollow"><blockquote style="padding-left:6px;margin:0;border-left:3px solid #64b5ef;font-style:normal;" cite="${reply.link}"><h4 style="font-weight:600;color:LinkText;margin:0;">${reply.author}</h4><p style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin:0;color:initial;">${replyText}<p></blockquote></a>`;
 }
@@ -112,8 +117,8 @@ async function getMediaInfo(media: Media) {
   };
 }
 
-function sanitizeDescriptionHtml(nodes: AnyNode[]) {
-  const queue = [...nodes];
+function sanitizeHtml(nodes: AnyNode | AnyNode[]) {
+  const queue = Array.isArray(nodes) ? [...nodes] : [nodes];
   while (queue.length > 0) {
     const node = queue.shift()!;
     if (isTag(node)) {
