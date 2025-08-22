@@ -3,6 +3,9 @@ import * as CSSselect from 'css-select';
 import type { Document, Element } from 'domhandler';
 import { innerText } from 'domutils';
 import { innerTextEx } from './domutils-extensions.js';
+// custom code - Patch
+import { URL } from 'url';
+
 
 export type Media = {
   type: 'photo' | 'video' | 'audio';
@@ -67,10 +70,14 @@ const MessagePollOptionSelector = CSSselect.compile('.tgme_widget_message_poll_o
 const MessagePollOptionPercentSelector = CSSselect.compile('.tgme_widget_message_poll_option_percent');
 const MessagePollOptionTextSelector = CSSselect.compile('.tgme_widget_message_poll_option_text');
 
-async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
+/*async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
   if (!channel) {
     throw new Error('Channel is required');
-  }
+  }*/
+//Custom patch code
+async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
+  if (!channel) throw new Error('Channel is required');
+
   if (channel.startsWith('@')) {
     channel = channel.slice(1);
   }
@@ -81,14 +88,55 @@ async function getChannelContent(channel: string, options?: { before?: number; a
   if (options?.after) {
     requestUrl.searchParams.set('after', options.after.toString());
   }
-  const response: any = await fetch(requestUrl);
-  if (!response.ok) {
+
+  //Custom Patch Code
+console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
+  
+  //const response: any = await fetch(requestUrl);
+
+  //Custom patch code
+  const response = await fetch(requestUrl.toString(), {
+    method: 'GET',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Referer': 'https://t.me/'
+    },
+    redirect: 'follow'
+  });
+    console.log(`[telegram-parser] status=${response.status} redirected=${response.redirected} finalUrl=${response.url}`);
+
+  
+  /*if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel}`);
   }
   if (response.redirected) {
     throw new Error(`Unknown channel: ${channel}`);
+  }*/
+
+  //Custom patch code
+  if (!response.ok) {
+    throw new Error(`Failed to fetch channel: ${channel} (status ${response.status}, url ${response.url})`);
   }
+
+  if (response.redirected) {
+    const final = response.url || '';
+    const isTme = final.startsWith('https://t.me/') || final.startsWith('http://t.me/');
+    if (!isTme) {
+      // redirect verso un dominio diverso -> probabile canale inesistente / blocco
+      throw new Error(`Unknown channel: ${channel}. Redirected to ${final}`);
+    } else {
+      console.log(`[telegram-parser] allowed internal redirect to ${final}`);
+    }
+  }
+
+  
   const rawHtml = await response.text();
+
+    //Add log
+  console.log(`[telegram-parser] body.length=${rawHtml.length}`);
+
   return htmlparser2.parseDocument(rawHtml);
 }
 
@@ -241,3 +289,4 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
+
