@@ -95,28 +95,30 @@ console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
     console.log(`[telegram-parser] status=${response.status} redirected=${response.redirected} finalUrl=${response.url}`);
 
   
-  /*if (!response.ok) {
+  if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel}`);
-  }*/
-  if (response.redirected) {
-    throw new Error(`Unknown channel: ${channel}`);
   }
+  /*if (response.redirected) {
+    throw new Error(`Unknown channel: ${channel}`);
+  }*/
 
   //Custom patch code
-  if (!response.ok) {
+  /*if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel} (status ${response.status}, url ${response.url})`);
-  }
+  }*/
 
-  /*if (response.redirected) {
-    const final = response.url || '';
-    const isTme = final.startsWith('https://t.me/') || final.startsWith('http://t.me/');
-    if (!isTme) {
+  if (response.redirected) {
+    //const final = response.url || '';
+    //const isTme = final.startsWith('https://t.me/') || final.startsWith('http://t.me/');
+    console.log(`[telegram-parser] status=${response.status} redirected=${response.redirected} finalUrl=${response.url}`);
+    //if (!isTme) {
       // redirect verso un dominio diverso -> probabile canale inesistente / blocco
-      throw new Error(`Unknown channel: ${channel}. Redirected to ${final}`);
-    } else {
+      //throw new Error(`Unknown channel: ${channel}. Redirected to ${final}`);
+   // }
+  else {
       console.log(`[telegram-parser] allowed internal redirect to ${final}`);
     }
-  }*/
+  }
 
   
   const rawHtml = await response.text();
@@ -276,6 +278,7 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
+
 
 
 
