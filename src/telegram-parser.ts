@@ -68,13 +68,13 @@ const MessagePollOptionSelector = CSSselect.compile('.tgme_widget_message_poll_o
 const MessagePollOptionPercentSelector = CSSselect.compile('.tgme_widget_message_poll_option_percent');
 const MessagePollOptionTextSelector = CSSselect.compile('.tgme_widget_message_poll_option_text');
 
-/*async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
+async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
   if (!channel) {
     throw new Error('Channel is required');
-  }*/
-//Custom patch code
+  }
+/*Custom patch code
 async function getChannelContent(channel: string, options?: { before?: number; after?: number }) {
-  if (!channel) throw new Error('Channel is required');
+  if (!channel) throw new Error('Channel is required');*/
 
   if (channel.startsWith('@')) {
     channel = channel.slice(1);
@@ -90,20 +90,20 @@ async function getChannelContent(channel: string, options?: { before?: number; a
   //Custom Patch Code
 console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
   
-  //const response: any = await fetch(requestUrl);
+  const response: any = await fetch(requestUrl);
 
-  //Custom patch code
+  /*Custom patch code
   const response: any = await fetch(requestUrl.toString(), {
     method: 'GET',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-      'Referer': 'https://t.me/'
-    },
-    // Edge runtime supporta il redirect: 'follow' di default, ma lasciamolo esplicito
-    redirect: 'follow' as RequestRedirect // (solo per TS)
-  });
+ //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+ //     'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+//      'Referer': 'https://t.me/'
+/*    },
+    
+    redirect: 'follow' as RequestRedirect
+  });*/
     console.log(`[telegram-parser] status=${response.status} redirected=${response.redirected} finalUrl=${response.url}`);
 
   
@@ -288,5 +288,6 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
+
 
 
