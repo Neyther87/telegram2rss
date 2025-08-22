@@ -4,7 +4,6 @@ import type { Document, Element } from 'domhandler';
 import { innerText } from 'domutils';
 import { innerTextEx } from './domutils-extensions.js';
 
-
 export type Media = {
   type: 'photo' | 'video' | 'audio';
   url: string;
@@ -72,7 +71,6 @@ async function getChannelContent(channel: string, options?: { before?: number; a
   if (!channel) {
     throw new Error('Channel is required');
   }
-
   if (channel.startsWith('@')) {
     channel = channel.slice(1);
   }
@@ -83,18 +81,14 @@ async function getChannelContent(channel: string, options?: { before?: number; a
   if (options?.after) {
     requestUrl.searchParams.set('after', options.after.toString());
   }
-  
   const response: any = await fetch(requestUrl);
-  
   if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel}`);
   }
   if (response.redirected) {
     throw new Error(`Unknown channel: ${channel}`);
   }
-
   const rawHtml = await response.text();
-
   return htmlparser2.parseDocument(rawHtml);
 }
 
@@ -247,12 +241,4 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
-
-
-
-
-
-
-
-
 
