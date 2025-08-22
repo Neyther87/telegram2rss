@@ -116,7 +116,7 @@ console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
       //throw new Error(`Unknown channel: ${channel}. Redirected to ${final}`);
    // }
   else {
-      console.log(`[telegram-parser] allowed internal redirect to ${final}`);
+      console.log(`[telegram-parser] allowed internal redirect to ${channel}`);
     }
   }
 
@@ -278,6 +278,7 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
+
 
 
 
