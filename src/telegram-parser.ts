@@ -97,17 +97,17 @@ console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
   
   /*if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel}`);
-  }
+  }*/
   if (response.redirected) {
     throw new Error(`Unknown channel: ${channel}`);
-  }*/
+  }
 
   //Custom patch code
   if (!response.ok) {
     throw new Error(`Failed to fetch channel: ${channel} (status ${response.status}, url ${response.url})`);
   }
 
-  if (response.redirected) {
+  /*if (response.redirected) {
     const final = response.url || '';
     const isTme = final.startsWith('https://t.me/') || final.startsWith('http://t.me/');
     if (!isTme) {
@@ -116,7 +116,7 @@ console.log(`[telegram-parser] fetching ${requestUrl.toString()}`);
     } else {
       console.log(`[telegram-parser] allowed internal redirect to ${final}`);
     }
-  }
+  }*/
 
   
   const rawHtml = await response.text();
@@ -276,6 +276,7 @@ export async function getChannelInfoWithPosts(channel: string, options?: { count
     posts: posts,
   };
 }
+
 
 
 
